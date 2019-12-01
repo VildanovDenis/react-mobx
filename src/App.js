@@ -1,11 +1,12 @@
 import React from 'react';
-import { observable, computed, extendObservable, configure, action } from 'mobx';
+import { observable, computed, configure, action, decorate } from 'mobx';
 
 import Counter from './containers/counter';
 import Nickname from './containers/nickname';
+import ToDos from './containers/todos';
+import Table from './containers/table';
 
 import './App.css';
-import ToDos from './containers/todos';
 
 configure({ enforceActions: 'observed' });
 /**
@@ -63,6 +64,74 @@ const todos = observable([
   }
 ])
 
+class Store {
+  devList = [
+    {
+      name: 'Denis',
+      sp: 8
+    },
+    {
+      name: 'Alex',
+      sp: 10
+    },
+    {
+      name: 'Anatoliy',
+      sp: 11
+    }
+  ];
+  filter = '';
+
+  get totalSum() {
+    return this.devList.reduce((acc, { sp }, _) => acc += sp, 0);
+  };
+
+  get topPerfomer() {
+    const maxSpDeveloper = this.devList.reduce((acc, item, _) => {
+      return acc.sp < item.sp ? acc = item : acc;
+    }, {
+      name: '',
+      sp: 0
+    });
+
+    return maxSpDeveloper.name
+    // const maxSp = Math.max(...this.devList.map(({ sp }) => sp));
+    // return this.devList.find(({ sp, name }) => {
+    //   if (maxSp === sp) {
+    //     return name
+    //   } else {
+    //     return ''
+    //   }
+    // });
+  };
+
+  get filteredDevelopers() {
+    const matchesFilter = new RegExp(this.filter, 'i');
+    return this.devList.filter(({ name }) => !this.filter || matchesFilter.test(name));
+  }
+
+  clearList() {
+    this.devList = [];
+  };
+
+  addDeveloper(developer) {
+    this.devList.push(developer);
+  };
+
+  updateFilter(value) {
+    this.filter = value
+  }
+}
+
+decorate(Store, {
+  devList: observable,
+  filter: observable,
+  totalSum: computed,
+  topPerfomer: computed,
+  filteredDevelopers: computed,
+  clearList: action,
+  addDeveloper: action,
+  updateFilter: action
+});
 // nickNameState.increment = function() {
 //   this.age++
 // };
@@ -70,12 +139,15 @@ const todos = observable([
 //   this.age--
 // };
 
+const devStore = new Store();
+
 function App() {
   return (
     <div className="App">
       <Counter store={counterState} />
       <Nickname store={nickNameState}/>
       <ToDos store={todos} />
+      <Table store={devStore} />
     </div>
   );
 }
