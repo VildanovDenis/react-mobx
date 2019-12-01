@@ -1,12 +1,25 @@
 import React from 'react';
-import DevTools from 'mobx-react-devtools';
+import { observable } from 'mobx';
+
+import Counter from './containers/counter';
+
 import './App.css';
+
+const counterState = observable({
+  count: 0
+});
+  
+counterState.increment = function() {
+  this.count++
+};
+counterState.decrement = function() {
+  this.count--
+}
 
 function App() {
   return (
     <div className="App">
-      <DevTools />
-      <h1>hello world</h1>
+      <Counter store={counterState} />
     </div>
   );
 }
